@@ -1,0 +1,33 @@
+# ASD-GAIT v40 inference backend.
+# Versions below are the ones the backend was verified against on Windows /
+# Python 3.10. The boosting + sklearn + interpret versions matter most, because
+# they must be able to unpickle the fitted estimators inside the .joblib bundle.
+
+# --- web ---
+fastapi==0.133.0
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+
+# --- numeric / ML core ---
+numpy==1.26.4
+pandas==2.3.3
+scipy==1.15.3
+scikit-learn==1.6.1
+joblib>=1.3
+openpyxl>=3.1            # .xlsx skeleton files
+
+# --- deep model ---
+torch==2.11.0            # CPU build is fine; CUDA used automatically if present
+
+# --- fused ensembles + distilled EBM (must unpickle the joblib) ---
+xgboost==3.2.0
+lightgbm==4.6.0
+catboost==1.2.10
+interpret==0.7.8
+
+# --- RGB video path (experimental) ---
+mediapipe==0.10.9
+opencv-python==4.11.0
+
+# --- misc ---
+tqdm>=4.66

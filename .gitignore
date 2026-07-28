@@ -1,0 +1,28 @@
+# --- dependencies / build ---
+node_modules/
+dist/
+build/
+.vite/
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+catboost_info/
+
+# --- raw datasets ---
+# Skeleton/gait recordings, including the private paediatric deployment cohort,
+# are NOT published (identifiable child data). Trained model weights are kept.
+colab/*.npz
+colab/*.npy
+colab/*.pt
+colab/*.zip
+
+# --- logs / os / editor ---
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

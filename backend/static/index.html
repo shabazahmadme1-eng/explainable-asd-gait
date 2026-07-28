@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ASD-GAIT v40 — Screening Report</title>
+<style>
+  :root { --bg:#0f1420; --card:#1a2233; --ink:#e8edf6; --mut:#9aa7bd; --line:#2a3550;
+          --atyp:#e0574a; --typ:#3fae6b; --warn:#e0a23a; --accent:#5b8def; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+         background:var(--bg); color:var(--ink); }
+  .wrap { max-width:860px; margin:0 auto; padding:28px 18px 60px; }
+  h1 { font-size:20px; margin:0 0 2px; }
+  .sub { color:var(--mut); font-size:13px; margin-bottom:18px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+          padding:18px; margin-bottom:16px; }
+  label { display:block; font-size:12px; color:var(--mut); margin:0 0 4px; }
+  .row { display:flex; gap:14px; flex-wrap:wrap; align-items:end; }
+  .row > div { flex:1; min-width:120px; }
+  input,select { width:100%; background:#0d1626; color:var(--ink); border:1px solid var(--line);
+                 border-radius:8px; padding:9px 10px; font-size:14px; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:11px 20px;
+           font-size:15px; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  .disc { font-size:12px; color:var(--warn); border:1px solid var(--warn); background:#251c0e;
+          border-radius:8px; padding:8px 11px; margin-bottom:16px; }
+  .flag { font-size:26px; font-weight:800; letter-spacing:.5px; }
+  .pill { display:inline-block; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; }
+  .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin-top:14px; }
+  .metric { background:#0d1626; border:1px solid var(--line); border-radius:9px; padding:10px 12px; }
+  .metric .k { font-size:11px; color:var(--mut); } .metric .v { font-size:18px; font-weight:700; }
+  .trace { display:flex; align-items:flex-end; gap:3px; height:120px; margin-top:8px;
+           border-bottom:1px solid var(--line); padding-bottom:2px; }
+  .bar { flex:1; border-radius:3px 3px 0 0; min-width:4px; }
+  .axis { display:flex; justify-content:space-between; font-size:11px; color:var(--mut); margin-top:4px; }
+  .muted { color:var(--mut); font-size:12px; }
+  .badge-warn { color:var(--warn); border:1px solid var(--warn); border-radius:6px; padding:2px 7px; font-size:12px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ASD-GAIT — Movement Screening</h1>
+  <div class="sub">MS-G3D + handcrafted fusion with a distilled EBM surrogate · window-level per-child report</div>
+  <div class="disc"><b>Screening aid, not a diagnosis.</b> Cross-device (phone) accuracy is unvalidated;
+     an out-of-distribution warning means the learned stream is extrapolating.</div>
+
+  <div class="card">
+    <div class="row">
+      <div style="flex:2"><label>Keypoint CSV or video</label>
+        <input id="file" type="file" accept=".csv,.xlsx,.mp4,.mov,.avi,.mkv,.webm"/></div>
+      <div><label>Window (s)</label><input id="win" type="number" value="3" step="0.5" min="1"/></div>
+      <div><label>Step (s)</label><input id="step" type="number" value="1" step="0.5" min="0.5"/></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div style="flex:2"><label>Engine</label>
+        <select id="engine">
+          <option value="reconciled">Reconciled — paper arch + phone accuracy (recommended)</option>
+          <option value="kinetiq">Kinetiq — deployed single-XGBoost HC</option>
+          <option value="v40">v40 — Kinect-trained HC fusion</option>
+        </select></div>
+      <div><label>Fusion</label>
+        <select id="mode">
+          <option value="full">MS-G3D + HC (paper)</option>
+          <option value="hc">HC-only (robust)</option>
+        </select></div>
+      <div style="flex:0 0 auto; align-self:end"><button id="go">Analyze</button></div>
+    </div>
+    <div id="status" class="muted" style="margin-top:10px"></div>
+  </div>
+
+  <div id="result" class="card hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px">
+      <div>
+        <span id="flag" class="flag"></span>
+        <span id="cls" class="pill"></span>
+      </div>
+      <span id="ood" class="badge-warn hidden">⚠ out-of-distribution input</span>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="k">Atypical windows</div><div class="v" id="m_prop"></div></div>
+      <div class="metric"><div class="k">Peak risk</div><div class="v" id="m_peak"></div></div>
+      <div class="metric"><div class="k">Average risk</div><div class="v" id="m_avg"></div></div>
+      <div class="metric"><div class="k">Primary region</div><div class="v" id="m_reg" style="font-size:15px"></div></div>
+      <div class="metric"><div class="k">Confidence</div><div class="v" id="m_conf" style="font-size:15px"></div></div>
+      <div class="metric"><div class="k">Fusion w<sub>emb</sub></div><div class="v" id="m_w"></div></div>
+    </div>
+    <div style="margin-top:18px"><label>Window-level risk trace</label>
+      <div id="trace" class="trace"></div>
+      <div class="axis"><span id="t0"></span><span>risk (green=typical, red=atypical) · dashed line = threshold</span><span id="t1"></span></div>
+    </div>
+    <div id="subscores" class="muted hidden" style="margin-top:14px; font-size:13px"></div>
+    <div id="explain" class="hidden" style="margin-top:14px">
+      <label>Why (distilled-EBM contributions to the fused decision)</label>
+      <div id="ebm" style="margin-top:6px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const VIDEO = /\.(mp4|mov|avi|mkv|webm|m4v)$/i;
+$("go").onclick = async () => {
+  const f = $("file").files[0];
+  if (!f) { $("status").textContent = "Choose a file first."; return; }
+  const isVid = VIDEO.test(f.name);
+  const engine = $("engine").value;
+  const hc = $("mode").value === "hc";
+  const p = new URLSearchParams({ engine });
+  if (engine === "v40") {                       // v40 uses sliding-window params
+    p.set("window_sec", $("win").value); p.set("step_sec", $("step").value);
+    if (hc) p.set("emb_weight", "0");
+  } else {                                       // reconciled / kinetiq
+    p.set("fuse_msg3d", hc ? "false" : "true");
+  }
+  const url = (isVid ? "/report/video?" : "/report/csv?") + p.toString();
+  const fd = new FormData(); fd.append("file", f);
+  $("go").disabled = true; $("result").classList.add("hidden");
+  $("status").textContent = isVid ? "Extracting pose + scoring (videos take longer)…" : "Scoring…";
+  try {
+    const r = await fetch(url, { method:"POST", body:fd });
+    const d = await r.json();
+    if (!r.ok) { $("status").textContent = "Error: " + (d.detail?.message || d.detail || r.status); return; }
+    render(d); $("status").textContent = "";
+  } catch (e) { $("status").textContent = "Request failed: " + e; }
+  finally { $("go").disabled = false; }
+};
+function render(d) {
+  $("result").classList.remove("hidden");
+  const atyp = d.screening_flag === "ATYPICAL";
+  $("flag").textContent = d.screening_flag;
+  $("flag").style.color = atyp ? "var(--atyp)" : "var(--typ)";
+  const cls = $("cls"); cls.textContent = d.classification;
+  cls.style.background = atyp ? "var(--atyp)" : "var(--typ)"; cls.style.color = "#fff";
+  const prop = Math.round(d.atypical_window_proportion * d.n_windows);
+  $("m_prop").textContent = `${prop}/${d.n_windows}`;
+  $("m_peak").textContent = d.peak_risk.toFixed(2);
+  $("m_avg").textContent = d.average_risk.toFixed(2);
+  $("m_reg").textContent = d.primary_region || "—";
+  $("m_conf").textContent = d.confidence;
+  $("m_w").textContent = d.weight_emb.toFixed(2);
+  $("ood").classList.toggle("hidden", !d.ood.warning);
+  const tr = $("trace"); tr.innerHTML = "";
+  const thr = d.threshold;
+  d.risk_trace.forEach(w => {
+    const b = document.createElement("div"); b.className = "bar";
+    b.style.height = Math.max(3, w.risk * 100) + "%";
+    b.style.background = w.atypical ? "var(--atyp)" : "var(--typ)";
+    b.title = `t=${w.t_mid}s  risk=${w.risk.toFixed(3)}  ${w.primary_region||""}`;
+    tr.appendChild(b);
+  });
+  $("t0").textContent = (d.risk_trace[0]?.t_start ?? 0) + "s";
+  $("t1").textContent = (d.risk_trace.at(-1)?.t_end ?? 0) + "s";
+
+  // sub-scores (fused = w·MS-G3D + (1-w)·HC) + deployment-faithful HC flag
+  const ss = $("subscores"); const bits = [`engine: <b>${d.engine}</b>`];
+  if (d.fused_score != null) bits.push(`fused P(ASD): <b>${d.fused_score.toFixed(2)}</b> (thr ${d.threshold})`);
+  if (d.msg3d_emb != null) bits.push(`MS-G3D embedding: <b>${d.msg3d_emb.toFixed(2)}</b>`);
+  if (d.hc_sustained_flag != null) bits.push(`HC sustained-spike flag: <b>${d.hc_sustained_flag ? "yes" : "no"}</b>`);
+  ss.innerHTML = bits.join(" &nbsp;·&nbsp; "); ss.classList.remove("hidden");
+
+  // distilled-EBM explanation (reconciled / v40 engines)
+  const feats = d.ebm_top_features || [];
+  const ex = $("explain"), eb = $("ebm");
+  if (feats.length) {
+    const mx = Math.max(...feats.map(f => Math.abs(f.contribution)), 1e-6);
+    eb.innerHTML = feats.map(f => {
+      const w = Math.round(Math.abs(f.contribution) / mx * 100);
+      const pos = f.contribution >= 0;                 // + pushes toward ASD
+      return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0">
+        <span style="flex:0 0 46%;font-size:12px" title="${f.feature}">${f.feature}</span>
+        <span style="flex:1;height:12px;background:#0002;border-radius:3px;position:relative">
+          <span style="position:absolute;${pos?'left':'right'}:50%;width:${w/2}%;height:100%;
+            background:${pos?'var(--atyp)':'var(--typ)'};border-radius:3px"></span></span>
+        <span style="flex:0 0 auto;font-size:12px">${f.contribution>=0?'+':''}${f.contribution.toFixed(3)}</span>
+      </div>`;
+    }).join("");
+    ex.classList.remove("hidden");
+  } else { ex.classList.add("hidden"); }
+}
+</script>
+</body>
+</html>
