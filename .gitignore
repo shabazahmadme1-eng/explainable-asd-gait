@@ -26,3 +26,14 @@ colab/*.zip
 Thumbs.db
 .idea/
 .vscode/
+
+# --- manuscript + paper-generation tooling (kept OUT of the public repo) ---
+# The manuscript is unpublished and co-authored; the edit_docx*/regen_* scripts
+# embed its text/figures and use machine-local absolute paths.
+*.docx
+*.pdf
+colab/edit_docx*.py
+colab/number_eqs.py
+colab/swap_figs.py
+colab/regen_fig*.py
+colab/render_eqs.py
