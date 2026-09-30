@@ -10,7 +10,34 @@ domain gap.
 > that differ from typically-developing peers and warrant a closer clinical look —
 > never a diagnosis. The clinician remains the decision-maker.
 
-## Model
+## Paper version (Neuroscience Informatics submission, 2026)
+
+The manuscript *Interpretable fusion of learned and biomechanical skeletal gait
+representations for autism-related motor atypicality* evaluates the **v40 model**,
+which differs from the deployed app described further below:
+
+- **Learned stream:** two-stream MS-G3D (SpineBase-centred joints + parent-relative
+  bones), NTU RGB+D 60 initialisation, 768-D embedding → PCA 150 → XGBoost / LightGBM /
+  CatBoost.
+- **Handcrafted stream:** 534 biomechanical features (joint angles, torso-normalised
+  distances, Kendall correlations, left–right asymmetry) → fold-wise filtering →
+  XGBoost / LightGBM / CatBoost.
+- **Fusion:** decision-level fusion with a per-seed weight; a distilled EBM explains the
+  fused probability.
+- **Validation:** child-grouped 5-fold CV × 3 seeds on the Al-Jubouri Kinect v2
+  dataset (50 ASD / 50 TD): 93.3 ± 1.2 % accuracy, AUC 0.979 ± 0.007. No cross-device
+  or phone results are part of the paper.
+- **Saved models and fold summaries:** `v40_artifacts/asd_gait_v40_3seed.joblib`,
+  `v40_artifacts/v40_3seed_summary.json`.
+- **Paper figures:** `colab/make_figs_nsi_v2.py` regenerates Figures 1–5 and the
+  graphical abstract from the saved artifacts (`v40_artifacts/v40_3seed_summary.json`
+  and `colab/nsi_model_facts.json`, the latter produced from the saved model by
+  `colab/inspect_nsi_model.py`).
+
+The angular stream, phone calibration and phone results in the sections below
+describe the deployed screening app, not the paper.
+
+## Model (deployed app)
 
 ```
 skeleton (T × 75)
@@ -75,5 +102,6 @@ attribution, kinematic findings, and quality/borderline notes.
 
 ## Reference
 
-Puppala, Hasib, Aashna, Tej — *Interpretable Multilevel Fusion of Skeletal Gait
-Signals for Autism Screening* (manuscript).
+Puppala, Gorthi, Hasib, Tej, Aashna, Kalyan — *Interpretable fusion of learned and
+biomechanical skeletal gait representations for autism-related motor atypicality*
+(manuscript submitted to Neuroscience Informatics, 2026).
