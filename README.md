@@ -95,15 +95,14 @@ transfer off Kinect. The angular score is Platt-calibrated (fit on MediaPipe pos
 the displayed movement-model number is not inflated. A borderline band around the
 operating point flags low-confidence cases for review.
 
-**Development-stage checks (grouped by child)**
+**Development-stage check (grouped by child)**
 
 | | AUC | accuracy |
 |---|---|---|
 | In-domain (Kinect, grouped 10-fold) | 0.980 | 92% |
-| Real phone captures | 0.979 | 15/16 |
 
-These are prototype checks on small samples. The phone row is not an independent,
-frozen-model validation and is not reported in the manuscript.
+This is a prototype check on a small sample and is not reported in the manuscript.
+The prototype has no independent smartphone validation.
 
 `age_group=adult` engages a **provisional** adult mode: the movement model is
 child-trained, so adult mode screens on handcrafted biomechanics only and is not
