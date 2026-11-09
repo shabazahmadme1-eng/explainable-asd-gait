@@ -12,13 +12,13 @@ __pycache__/
 venv/
 catboost_info/
 
-# --- raw datasets ---
-# Skeleton/gait recordings, including the private paediatric deployment cohort,
-# are NOT published (identifiable child data). Trained model weights are kept.
-colab/*.npz
-colab/*.npy
-colab/*.pt
-colab/*.zip
+# --- raw datasets and experiment outputs (angular model) ---
+# Skeleton/gait recordings, including the private paediatric phone cohort, are NOT
+# published (identifiable child data). Trained model weights in */artifacts/ are kept.
+angular/training/*.npz
+angular/training/*.npy
+angular/training/*.pt
+angular/training/*.zip
 
 # --- logs / os / editor ---
 *.log
@@ -27,13 +27,12 @@ Thumbs.db
 .idea/
 .vscode/
 
-# --- manuscript + paper-generation tooling (kept OUT of the public repo) ---
-# The manuscript is unpublished and co-authored; the edit_docx*/regen_* scripts
-# embed its text/figures and use machine-local absolute paths.
+# --- manuscript, submission packages and paper-generation tooling (local only) ---
+# The manuscript is unpublished and co-authored; the tooling embeds its text and
+# figures and uses machine-local absolute paths.
+_manuscript/
+paper/figures/figs_nsi_v2/
 *.docx
 *.pdf
-colab/edit_docx*.py
-colab/number_eqs.py
-colab/swap_figs.py
-colab/regen_fig*.py
-colab/render_eqs.py
+*.tif
+*.zip

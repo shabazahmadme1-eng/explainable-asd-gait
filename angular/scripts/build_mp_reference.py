@@ -16,7 +16,7 @@ Usage:
   python -m scripts.build_mp_reference --csv "C:/path/to/keypoint_csvs/*.csv"
   # from videos (runs MediaPipe extraction first):
   python -m scripts.build_mp_reference --video "C:/path/to/typical/**/*.mp4"
-  # output (default): v40_artifacts/mp_skeleton_reference.npz
+  # output (default): artifacts/mp_skeleton_reference.npz
 """
 from __future__ import annotations
 

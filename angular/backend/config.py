@@ -19,7 +19,7 @@ BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = os.path.dirname(BACKEND_DIR)
 
 ARTIFACT_DIR = os.environ.get(
-    "ASD_ARTIFACT_DIR", os.path.join(PROJECT_DIR, "v40_artifacts")
+    "ASD_ARTIFACT_DIR", os.path.join(PROJECT_DIR, "artifacts")
 )
 # The 3-seed bundle is the headline model; single-seed is available as a fallback.
 JOBLIB_PATH = os.environ.get(

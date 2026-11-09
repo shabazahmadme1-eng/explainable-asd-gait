@@ -7,7 +7,7 @@ Fig. 2  study pipeline (American spelling; CV scope drawn explicitly).
 Fig. 3  stream ablation: per-seed child-level accuracy from v40_artifacts/v40_3seed_summary.json.
 Fig. 4  child-level confusion matrices of the only two pipelines run under the identical
         three-seed protocol (averaged OOF counts from the original package's Fig. 7).
-Fig. 5  ten largest EBM term importances, read from colab/nsi_model_facts.json.
+Fig. 5  ten largest EBM term importances, read from figures/nsi_model_facts.json.
 Graphical abstract.
 
 Current NSI artwork rules: vector drawings as EPS/PDF with embedded fonts; bitmapped line
