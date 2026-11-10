@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Activity } from 'lucide-react';
 import BrandMark from '../common/BrandMark.jsx';
 import AuroraBackground from './AuroraBackground.jsx';
+import { BACKEND_CONNECTED } from '../../api/analyzeApi.js';
 
 const Layout = ({ children }) => {
   const { pathname } = useLocation();
@@ -74,13 +75,20 @@ const Layout = ({ children }) => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex chip">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            {BACKEND_CONNECTED ? (
+              <span className="hidden sm:inline-flex chip">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                </span>
+                Model online
               </span>
-              Model online
-            </span>
+            ) : (
+              <span className="hidden sm:inline-flex chip">
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Server offline
+              </span>
+            )}
             {onReport ? (
               <span className="chip">
                 <Activity className="w-3.5 h-3.5 text-brand-600" /> Report

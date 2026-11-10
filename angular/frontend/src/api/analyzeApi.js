@@ -1,12 +1,20 @@
-// Base URL comes from .env (VITE_API_URL); falls back to local dev.
-const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000').replace(/\/$/, '');
+// Base URL comes from .env (VITE_API_URL); local dev falls back to a local backend.
+// A production build without VITE_API_URL (the GitHub Pages demo while no backend is
+// hosted) has no analysis server, and the UI says so instead of failing silently.
+const API_URL = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8000' : ''))
+  .replace(/\/$/, '');
+export const BACKEND_CONNECTED = Boolean(API_URL);
+export const NO_BACKEND_MESSAGE =
+  'The analysis server for this online demo is not connected yet, so files cannot be analysed here. ' +
+  'To try it, run the backend locally (see angular/README.md in the GitHub repository).';
 
 export const analyzePatientData = async (file, ageGroup = 'child') => {
+  if (!BACKEND_CONNECTED) throw new Error(NO_BACKEND_MESSAGE);
   const formData = new FormData();
   formData.append('file', file);
 
   // Tell the FastAPI backend whether this is a CSV or a video.
-  const isCSV = file.name.toLowerCase().endsWith('.csv');
+  const isCSV = /\.(csv|xlsx)$/i.test(file.name);  // coordinate CSV or Excel
   formData.append('file_type', isCSV ? 'csv' : 'video');
 
   // Child (default) uses the full HC + movement-model fusion; Adult disables the

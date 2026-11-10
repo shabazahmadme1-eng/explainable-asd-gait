@@ -23,6 +23,7 @@ const VideoDropzone = ({ onFileSelect, isLoading }) => {
     const validTypes = [
       'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/avi',
       'text/csv', 'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
     const isValidType = validTypes.includes(file.type);
 
@@ -31,10 +32,11 @@ const VideoDropzone = ({ onFileSelect, isLoading }) => {
       fileName.endsWith('.mp4') ||
       fileName.endsWith('.mov') ||
       fileName.endsWith('.avi') ||
-      fileName.endsWith('.csv');
+      fileName.endsWith('.csv') ||
+      fileName.endsWith('.xlsx');
 
     if (!isValidType && !isValidExtension) {
-      setError('Please upload a valid MP4, MOV, AVI, or CSV file.');
+      setError('Please upload a valid MP4, MOV, AVI, CSV or Excel (.xlsx) file.');
       return;
     }
 
@@ -64,7 +66,7 @@ const VideoDropzone = ({ onFileSelect, isLoading }) => {
     setError('');
   };
 
-  const isCSV = selectedFile?.name?.toLowerCase().endsWith('.csv');
+  const isCSV = /\.(csv|xlsx)$/i.test(selectedFile?.name || '');
 
   return (
     <div className="w-full max-w-2xl mx-auto glow-card rounded-[1.75rem]">
@@ -97,7 +99,7 @@ const VideoDropzone = ({ onFileSelect, isLoading }) => {
               type="file"
               className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
               onChange={handleChange}
-              accept=".mp4,.mov,.avi,.csv"
+              accept=".mp4,.mov,.avi,.csv,.xlsx"
               disabled={isLoading}
             />
             <div className="relative mb-5 pointer-events-none">
@@ -118,7 +120,7 @@ const VideoDropzone = ({ onFileSelect, isLoading }) => {
               Drop a recording, or <span className="text-brand-600 underline decoration-brand-300 underline-offset-4">browse files</span>
             </p>
             <p className="mt-2 text-xs text-ink-400 font-medium tracking-wide">
-              MP4 · MOV · AVI · CSV — up to a few minutes of gait
+              MP4 · MOV · AVI · CSV · XLSX — up to a few minutes of gait
             </p>
           </>
         ) : (

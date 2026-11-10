@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ScanLine, Gauge, FileBarChart, ArrowUpRight, AlertTriangle, Sparkles } from 'lucide-react';
 
 import VideoDropzone from '../components/upload/VideoDropzone.jsx';
-import { analyzePatientData } from '../api/analyzeApi.js';
+import { analyzePatientData, BACKEND_CONNECTED, NO_BACKEND_MESSAGE } from '../api/analyzeApi.js';
 import Spinner from '../components/common/Spinner.jsx';
 import Reveal from '../components/common/Reveal.jsx';
 import { useTiltSpotlight } from '../hooks/useInteractions.js';
@@ -81,7 +81,7 @@ const HomePage = () => {
   };
 
   if (isProcessing) {
-    const isCSV = file?.name?.toLowerCase().endsWith('.csv');
+    const isCSV = /\.(csv|xlsx)$/i.test(file?.name || '');
     const spinnerText = isCSV
       ? 'Running XGBoost clinical inference…'
       : 'Extracting 3D kinematics & scoring windows…';
@@ -137,6 +137,12 @@ const HomePage = () => {
 
       {/* UPLOAD */}
       <section className="animate-fade-up" style={{ animationDelay: '180ms' }}>
+        {!BACKEND_CONNECTED && (
+          <div className="mb-6 max-w-2xl mx-auto flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 shadow-soft">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
+            <p className="text-sm font-medium text-amber-800">{NO_BACKEND_MESSAGE}</p>
+          </div>
+        )}
         {error && (
           <div className="mb-6 max-w-2xl mx-auto flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 shadow-soft">
             <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
